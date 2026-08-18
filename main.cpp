@@ -3,7 +3,6 @@
 #include <vector>
 #include <map>
 #include <algorithm>
-#include <fstream>
 
 using namespace std;
 
@@ -32,18 +31,20 @@ int main() {
             string index;
             int value;
             if (!(cin >> index >> value)) break;
-            if (db.count(index)) {
-                auto& vals = db[index];
-                auto it = lower_bound(vals.begin(), vals.end(), value);
-                if (it != vals.end() && *it == value) {
-                    vals.erase(it);
+            auto it_map = db.find(index);
+            if (it_map != db.end()) {
+                auto& vals = it_map->second;
+                auto it_val = lower_bound(vals.begin(), vals.end(), value);
+                if (it_val != vals.end() && *it_val == value) {
+                    vals.erase(it_val);
                 }
             }
         } else if (cmd == "find") {
             string index;
             if (!(cin >> index)) break;
-            if (db.count(index) && !db[index].empty()) {
-                const auto& vals = db[index];
+            auto it_map = db.find(index);
+            if (it_map != db.end() && !it_map->second.empty()) {
+                const auto& vals = it_map->second;
                 for (size_t j = 0; j < vals.size(); ++j) {
                     cout << vals[j] << (j == vals.size() - 1 ? "" : " ");
                 }
