@@ -17,34 +17,34 @@ int main() {
 
     for (int i = 0; i < n; ++i) {
         string cmd;
-        cin >> cmd;
+        if (!(cin >> cmd)) break;
         if (cmd == "insert") {
             string index;
             int value;
-            cin >> index >> value;
+            if (!(cin >> index >> value)) break;
             auto& vals = db[index];
-            if (find(vals.begin(), vals.end(), value) == vals.end()) {
-                vals.push_back(value);
-                sort(vals.begin(), vals.end());
+            auto it = lower_bound(vals.begin(), vals.end(), value);
+            if (it == vals.end() || *it != value) {
+                vals.insert(it, value);
             }
         } else if (cmd == "delete") {
             string index;
             int value;
-            cin >> index >> value;
+            if (!(cin >> index >> value)) break;
             if (db.count(index)) {
                 auto& vals = db[index];
-                auto it = find(vals.begin(), vals.end(), value);
-                if (it != vals.end()) {
+                auto it = lower_bound(vals.begin(), vals.end(), value);
+                if (it != vals.end() && *it == value) {
                     vals.erase(it);
                 }
             }
         } else if (cmd == "find") {
             string index;
-            cin >> index;
+            if (!(cin >> index)) break;
             if (db.count(index) && !db[index].empty()) {
                 const auto& vals = db[index];
-                for (size_t i = 0; i < vals.size(); ++i) {
-                    cout << vals[i] << (i == vals.size() - 1 ? "" : " ");
+                for (size_t j = 0; j < vals.size(); ++j) {
+                    cout << vals[j] << (j == vals.size() - 1 ? "" : " ");
                 }
                 cout << "\n";
             } else {
