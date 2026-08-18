@@ -3,17 +3,52 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <fstream>
 
 using namespace std;
+
+const string DB_FILE = "database.db";
+
+void save_db(const map<string, vector<int>>& db) {
+    ofstream out(DB_FILE, ios::binary);
+    for (auto const& [index, vals] : db) {
+        size_t idx_len = index.size();
+        out.write(reinterpret_cast<const char*>(&idx_len), sizeof(idx_len));
+        out.write(index.data(), idx_len);
+        size_t vals_size = vals.size();
+        out.write(reinterpret_cast<const char*>(&vals_size), sizeof(vals_size));
+        out.write(reinterpret_cast<const char*>(vals.data()), vals_size * sizeof(int));
+    }
+}
+
+void load_db(map<string, vector<int>>& db) {
+    ifstream in(DB_FILE, ios::binary);
+    if (!in) return;
+    while (in) {
+        size_t idx_len;
+        if (!in.read(reinterpret_cast<char*>(&idx_len), sizeof(idx_len))) break;
+        string index(idx_len, ' ');
+        in.read(&index[0], idx_len);
+        size_t vals_size;
+        in.read(reinterpret_cast<char*>(&vals_size), sizeof(vals_size));
+        vector<int> vals(vals_size);
+        in.read(reinterpret_cast<char*>(vals.data()), vals_size * sizeof(int));
+        db[index] = vals;
+    }
+}
 
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
 
-    int n;
-    if (!(cin >> n)) return 0;
-
     map<string, vector<int>> db;
+    load_db(db);
+
+    int n;
+    if (!(cin >> n)) {
+        save_db(db);
+        return 0;
+    }
 
     for (int i = 0; i < n; ++i) {
         string cmd;
@@ -55,5 +90,6 @@ int main() {
         }
     }
 
+    save_db(db);
     return 0;
 }
